@@ -4,7 +4,24 @@ import re
 from tkinter import messagebox
 from tkinter.messagebox import *
 
-global login__root, signup_root, name_var
+global login__root, name_var, ans1, ans2
+
+
+def signup():
+    global signup_root
+    signup_root = Tk()
+    login__root.withdraw()
+    signup_root.configure(bg='black')
+    app = SignUP(signup_root)
+    signup_root.mainloop()
+
+
+def login():
+    login__root = Toplevel()
+    signup_root.withdraw()
+    login__root.configure(bg='black')
+    app = Login(login__root)
+    login__root.mainloop()
 
 
 class Login:
@@ -30,7 +47,8 @@ class Login:
         self.email_var = StringVar()
         self.email_label = Label(self.login_frame, font=('', 20), fg='black', bg='white', text="EMAIL: ",
                                  anchor="center").grid(row=0, column=1, padx=3, pady=3)
-        self.email_entry = Entry(self.login_frame, fg='black', cursor='ibeam', width=50, bg='white', textvar=self.email_var)
+        self.email_entry = Entry(self.login_frame, fg='black', cursor='ibeam', width=50, bg='white',
+                                 textvar=self.email_var)
         self.email_entry.grid(row=0, column=2, padx=3, pady=3)
 
         # password label and entry
@@ -42,24 +60,49 @@ class Login:
         self.password_entry.grid(row=1, column=2, padx=3, pady=3)
 
         def login():
-            email = self.email_entry.get()
-            password = self.password_entry.get()
-            conn = sqlite3.connect('Details.db')
-            with conn:
-                cursor = conn.cursor()
-            cursor.execute('CREATE TABLE IF NOT EXISTS Details (name TEXT, email TEXT, password TEXT)')
-            with conn:
-                cursor.execute("SELECT email,password FROM Details")
-                ans = cursor.fetchall()
-                for i in ans:
-                    if email in i:
-                        if password == i[1]:
-                            showinfo("Message", "LOGIN SUCCESS")
-                        else:
-                            showerror("ERROR", "Enter correct password")
+            global ans2
+            global ans1
+            while True:
+                if self.email_entry.get() == '':
+                    messagebox.showinfo("ERROR", "PLEASE ENTER EMAIL")
+                    ans1= False
+                    break
+                else:
+                    email = self.email_entry.get()
+                    ans1 = True
+                    break
+
+            while True:
+                if self.password_entry.get() == '':
+                    messagebox.showinfo("ERROR", "PLEASE ENTER PASSWORD")
+                    ans2= False
+                    break
+                else:
+                    password = self.password_entry.get()
+                    ans2 = True
+                    break
+            if ans1 == True and ans2 == True:
+                conn = sqlite3.connect('Details.db')
+                with conn:
+                    cursor = conn.cursor()
+                cursor.execute('CREATE TABLE IF NOT EXISTS Details (name TEXT, email TEXT, password TEXT)')
+                with conn:
+                    cursor.execute("SELECT email,password FROM Details")
+                    ans = cursor.fetchall()
+                    for i in ans:
+                      
+                        if email == i[0]:
+                            if password == i[1]:
+                                showinfo("Message", "LOGIN SUCCESS")
+                                break
+                            else:
+                                showerror("ERROR", "Enter correct password")
+                                continue
                     else:
                         showerror("ERROR", "Enter correct email id")
-                # login button
+
+
+        # login button
         self.login_button = Button(self.login_frame, text='LOGIN', fg='black', bg='#3FEEE6', height=2, width=15,
                                    command=login).grid(
             row=2, column=2, padx=3, pady=3)
@@ -113,8 +156,22 @@ class SignUP:
 
         def signup_user():
             global ans
-            name = self.name_entry.get()
-            password = self.password_entry.get()
+
+            while True:
+                if self.name_entry.get() is '':
+                    messagebox.showerror("ERROR", "Please enter name")
+                    break
+                else:
+                    name = self.name_entry.get()
+                    break
+
+            while True:
+                if self.password_entry.get() is '':
+                    messagebox.showerror("ERROR", "Please enter password")
+                    break
+                else:
+                    password = self.password_entry.get()
+                    break
 
             while True:
                 regex = '^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$'
@@ -137,20 +194,19 @@ class SignUP:
                                'VALUES(?,?,?)', (name, email, password))
                 conn.commit()
 
+                messagebox.showinfo("INFO", "SUCCESSFULLY SIGNUP")
+
         self.signup_button = Button(self.log_frame, text='SIGNUP', fg='black', bg='#3FEEE6', height=2, width=15,
                                     command=signup_user).grid(row=3, column=2, padx=3, pady=3)
 
         # login button
-        self.login_button = Button(self.log_frame, text='LOGIN', fg='black', bg='#3FEEE6', height=2, width=15).grid(
+        self.login_button = Button(self.log_frame, text='LOGIN', fg='black', bg='#3FEEE6', height=2, width=15,
+                                   command=login).grid(
             row=3, column=1, padx=3, pady=3)
 
 
-def signup():
-    signup_root = Tk()
-    login__root.withdraw()
-    signup_root.configure(bg='black')
-    app = SignUP(signup_root)
-    signup_root.mainloop()
+# class Dictionary:
+#     def __init__(self, dic_root):
 
 
 if __name__ == '__main__':
